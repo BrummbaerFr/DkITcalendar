@@ -72,11 +72,12 @@ for (var course of classes) {
 	var moduleName = attributes[0].getElementsByTagName("TD")[0].innerHTML;
 
 	var parent = document.getElementsByClassName("row-label-one")[3];
-	var rowCells = parent.getElementsByTagName("TD");
+	var rowCells = parent.parentElement.children;
 	var cellIndex = 0;
 
-	for (var i = 1; i < rowCells.length; i++) {
-		cellIndex += rowCells[i].colSpan;
+	for (var i = 1; rowCells[i].cellIndex < course.parentElement.cellIndex; i++) {
+		if (rowCells[i].hasAttribute("colSpan")) cellIndex += rowCells[i].colSpan
+		else cellIndex++;
 	}
 
 	console.log("cellIndex=" + cellIndex);
