@@ -71,8 +71,18 @@ for (var course of classes) {
 
 	var moduleName = attributes[0].getElementsByTagName("TD")[0].innerHTML;
 
-	var startTime = formattedTimes[course.cellIndex * 2];
-	var endTime = formattedTimes[course.cellIndex * 2 + course.colSpan];
+	var parent = document.getElementsByClassName("row-label-one")[3];
+	var rowCells = parent.getElementsByTagName("TD");
+	var cellIndex = 0;
+
+	for (var i = 1; i < rowCells.length; i++) {
+		cellIndex += rowCells[i].colSpan;
+	}
+
+	console.log("cellIndex=" + cellIndex);
+
+	var startTime = formattedTimes[cellIndex];
+	var endTime = formattedTimes[cellIndex + course.colSpan];
 
 	var dayOfWeek = daysDate[course.parentElement.rowIndex - 1];
 
