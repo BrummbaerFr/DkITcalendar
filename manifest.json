@@ -1,0 +1,28 @@
+{
+
+	"manifest_version": 2,
+	"name": "DkITcalendar",
+	"version": "1.0",
+
+	"description": "Transforms a DkIT timetable into an iCalendar file for export in calendar applications.",
+
+	"icons": {
+	"48": "icons/48x48.png",
+	"96": "icons/96x96.png"
+	},
+
+	"permissions": [
+	"activeTab",
+	"downloads"
+	],
+
+	"browser_action": {
+	"default_icon": "icons/48x48.png",
+	"default_title": "DkIT Calendar"
+	},
+
+	"background": {
+	"scripts": ["calendar.js"]
+	}
+
+}
