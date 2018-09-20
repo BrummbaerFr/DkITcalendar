@@ -8,7 +8,7 @@ function hourMinuteToTime(time) {
 	
 	if (time.length < 4) time = "0" + time;
 	
-	return time;
+	return time + "00";
 }
 
 var calendar = new ICAL.Component(['vcalendar', [], []]);
@@ -29,9 +29,9 @@ var formattedTimes = [];
 for (var node of times)	formattedTimes.push(hourMinuteToTime(node.innerHTML));
 
 // Debugging:
-/*formattedTimes.forEach(function(e) {
+formattedTimes.forEach(function(e) {
 	console.log(e);
-});*/
+});
 
 var selectedWeek = document.getElementsByClassName("header-3-0-17")[0].innerHTML;
 var days = selectedWeek.split("-");
