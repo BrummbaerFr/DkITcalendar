@@ -13,6 +13,13 @@ function hourMinuteToTime(time) {
 	return time + "00";
 }
 
+/**
+ * Gives an ICAL Time object given a row and a cell index.
+ *
+ * @param rowIndex the index of the row the course is in.
+ * @param cellIndex the index of the row the course is in.
+ * @returns {Time} the ICAL Time object
+ */
 function getTime(rowIndex, cellIndex) {
 	var startMonth = daysDate[rowIndex - 1].substring(4, 6);
 	var startDay = daysDate[rowIndex - 1].substring(6, 8);
@@ -30,25 +37,10 @@ function getTime(rowIndex, cellIndex) {
 	});
 }
 
-// Testing out ical.js:
+// Creating the calendar:
 var calendar = new ICAL.Component(['vcalendar', [], []]);
 calendar.updatePropertyWithValue('prodid', 'DkIT timetables browser extension');
 calendar.addPropertyWithValue("version", "2.0");
-
-
-/*var vevent = new ICAL.Component('vevent'), event = new ICAL.Event(vevent);
-event.startDate = ICAL.Time.now();
-
-var cleanDate = new Date(Date.now()).toISOString().replace(/[-:.]/g, "");
-cleanDate = cleanDate.substring(0, cleanDate.length - 4) + "Z";
-console.log(cleanDate);
-
-vevent.addPropertyWithValue("dtstamp", ICAL.Time.now());
-
-calendar.addSubcomponent(vevent);*/
-
-
-
 
 // Generating hours and minutes of the day in ISO-8601 format:
 var times = document.getElementsByClassName("col-label-one");
@@ -66,7 +58,7 @@ daysDate = [];
 var firstDay = new Date(days[0]);
 var lastDay = new Date(days[1]);
 
-while (firstDay.getDate() != lastDay.getDate()) {
+while (firstDay.getDate() !== lastDay.getDate()) {
 	var month = firstDay.getMonth() + 1;
 
 	if (month < 10) month = String("0" + month);
@@ -80,9 +72,6 @@ while (firstDay.getDate() != lastDay.getDate()) {
 month = lastDay.getMonth() + 1;
 if (month < 10) month = String("0" + month);
 daysDate.push(lastDay.getFullYear() + String(month) + lastDay.getDate());
-
-
-
 
 // Reading classes:
 
@@ -100,8 +89,7 @@ for (var course of classes) {
 
 	var attributes = course.getElementsByClassName("object-cell-args");
 
-	var moduleName = attributes[0].getElementsByTagName("TD")[0].innerHTML;
-	event.summary = moduleName;
+	event.summary = attributes[0].getElementsByTagName("TD")[0].innerHTML;
 
 	// Getting the <tr> we're in:
 	var parentRow = course.parentElement;
@@ -117,12 +105,12 @@ for (var course of classes) {
 		else cellIndex++;
 	}
 
-	var startTime = getTime(course.parentElement.rowIndex, cellIndex);
-	event.startDate = startTime;
+	// Set the event start and end dates:
+	event.startDate = getTime(course.parentElement.rowIndex, cellIndex);
 
-	var endTime = getTime(course.parentElement.rowIndex, cellIndex + course.colSpan);
-	event.endDate = endTime;
+	event.endDate = getTime(course.parentElement.rowIndex, cellIndex + course.colSpan);
 
+	// Store the other attributes in an array:
 	var otherAttributes = [];
 
 	for (var i = 1; i < attributes.length; i++) {
@@ -131,13 +119,17 @@ for (var course of classes) {
 		for (var attr of tableData) otherAttributes.push(attr.innerHTML);
 	}
 
+	// Set the event location:
 	event.location = otherAttributes[0];
 
+	// ... use the attributes array to create a description:
 	event.description = "";
-	for (var i = 1; i < otherAttributes.length; i++) {
+	for (i = 1; i < otherAttributes.length; i++) {
 		event.description += otherAttributes[i] + "\r\n";
 	}
 
+
+	// Set the mandatory fields for the event (according to iCalendar specification):
 	vevent.addPropertyWithValue("dtstamp", ICAL.Time.now());
 	vevent.addPropertyWithValue("uid", "DkIT Calendar " + uidHash);
 

@@ -6,7 +6,7 @@ function download(file) {
 	var blob = new Blob([file["file"]], {type : 'text/plain'});
 	var objectURL = URL.createObjectURL(blob);
 
-	browser.downloads.download({filename: file["filename"], url: objectURL});
+	browser.downloads.download({filename: file["filename"] + ".ics", url: objectURL});
 }
 
 browser.browserAction.onClicked.addListener((tab) => {
