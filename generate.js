@@ -63,20 +63,27 @@ console.log(selectedWeek);
 
 // Reading classes:
 
+/* All table cells that contain class information
+* have the same class, put them in a variable: */
 var classes = document.getElementsByClassName("object-cell-border");
 
-// Read class attributes:
+// Read class attributes of each class:
 for (var course of classes) {
 	var attributes = course.getElementsByClassName("object-cell-args");
 
 	var moduleName = attributes[0].getElementsByTagName("TD")[0].innerHTML;
 
-	var parent = document.getElementsByClassName("row-label-one")[3];
-	var rowCells = parent.parentElement.children;
+	// Getting the <tr> we're in:
+	var parentRow = course.parentElement;
+	console.log(typeof course + " " + course.tagName)
+
 	var cellIndex = 0;
 
-	for (var i = 1; rowCells[i].cellIndex < course.parentElement.cellIndex; i++) {
-		if (rowCells[i].hasAttribute("colSpan")) cellIndex += rowCells[i].colSpan
+	for (var cell of parentRow.children) {
+		if (cell.className === "row-label-one") continue;
+		if (cell === course) break;
+
+		if (cell.hasAttribute("colSpan")) cellIndex += cell.colSpan
 		else cellIndex++;
 	}
 
