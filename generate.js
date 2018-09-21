@@ -3,38 +3,49 @@
 		this.last.firstDay=c.day,this.last.month=c.month},ruleDayOfWeek:function(a){var b=a.match(/([+-]?[0-9])?(MO|TU|WE|TH|FR|SA|SU)/);if(b){var c=parseInt(b[1]||0,10);return a=ICAL.Recur.icalDayToNumericDay(b[2]),[c,a]}return[0,0]},next_generic:function(a,b,c,d,e){var f=a in this.by_data,g=this.rule.freq==b,h=0;if(e&&0==this[e]())return h;if(f){this.by_indices[a]++;var i=(this.by_indices[a],this.by_data[a]);this.by_indices[a]==i.length&&(this.by_indices[a]=0,h=1),this.last[c]=i[this.by_indices[a]]}else g&&this["increment_"+c](this.rule.interval);return f&&h&&g&&this["increment_"+d](1),h},increment_monthday:function(a){for(var b=0;b<a;b++){var c=ICAL.Time.daysInMonth(this.last.month,this.last.year);this.last.day++,this.last.day>c&&(this.last.firstDay-=c,this.increment_month())}},increment_month:function(){if(this.last.firstDay=1,this.has_by_data("BYMONTH"))this.by_indices.BYMONTH++,this.by_indices.BYMONTH==this.by_data.BYMONTH.length&&(this.by_indices.BYMONTH=0,this.increment_year(1)),this.last.month=this.by_data.BYMONTH[this.by_indices.BYMONTH];else{"MONTHLY"==this.rule.freq?this.last.month+=this.rule.interval:this.last.month++,this.last.month--;var a=ICAL.helpers.trunc(this.last.month/12);this.last.month%=12,this.last.month++,0!=a&&this.increment_year(a)}},increment_year:function(a){this.last.year+=a},increment_generic:function(a,b,c,d){this.last[b]+=a;var e=ICAL.helpers.trunc(this.last[b]/c);this.last[b]%=c,0!=e&&this["increment_"+d](e)},has_by_data:function(a){return a in this.rule.parts},expand_year_days:function(a){var b=new ICAL.Time;this.days=[];var c={},d=["BYDAY","BYWEEKNO","BYMONTHDAY","BYMONTH","BYYEARDAY"];for(var e in d)if(d.hasOwnProperty(e)){var f=d[e];f in this.rule.parts&&(c[f]=this.rule.parts[f])}if("BYMONTH"in c&&"BYWEEKNO"in c){var g=1,h={};b.year=a,b.isDate=!0;for(var i=0;i<this.by_data.BYMONTH.length;i++){var j=this.by_data.BYMONTH[i];b.month=j,b.firstDay=1;var k=b.weekNumber(this.rule.wkst);b.firstDay=ICAL.Time.daysInMonth(j,a);var l=b.weekNumber(this.rule.wkst);for(i=k;i<l;i++)h[i]=1}for(var m=0;m<this.by_data.BYWEEKNO.length&&g;m++){var n=this.by_data.BYWEEKNO[m];n<52?g&=h[m]:g=0}g?delete c.BYMONTH:delete c.BYWEEKNO}var o=Object.keys(c).length;if(0==o){var p=this.dtstart.clone();p.year=this.last.year,this.days.push(p.dayOfYear())}else if(1==o&&"BYMONTH"in c){for(var q in this.by_data.BYMONTH)if(this.by_data.BYMONTH.hasOwnProperty(q)){var r=this.dtstart.clone();r.year=a,r.month=this.by_data.BYMONTH[q],r.isDate=!0,this.days.push(r.dayOfYear())}}else if(1==o&&"BYMONTHDAY"in c){for(var s in this.by_data.BYMONTHDAY)if(this.by_data.BYMONTHDAY.hasOwnProperty(s)){var t=this.dtstart.clone(),u=this.by_data.BYMONTHDAY[s];if(u<0){var v=ICAL.Time.daysInMonth(t.month,a);u=u+v+1}t.day=u,t.year=a,t.isDate=!0,this.days.push(t.dayOfYear())}}else if(2==o&&"BYMONTHDAY"in c&&"BYMONTH"in c){for(var q in this.by_data.BYMONTH)if(this.by_data.BYMONTH.hasOwnProperty(q)){var w=this.by_data.BYMONTH[q],v=ICAL.Time.daysInMonth(w,a);for(var s in this.by_data.BYMONTHDAY)if(this.by_data.BYMONTHDAY.hasOwnProperty(s)){var u=this.by_data.BYMONTHDAY[s];u<0&&(u=u+v+1),b.firstDay=u,b.month=w,b.year=a,b.isDate=!0,this.days.push(b.dayOfYear())}}}else if(1==o&&"BYWEEKNO"in c);else if(2==o&&"BYWEEKNO"in c&&"BYMONTHDAY"in c);else if(1==o&&"BYDAY"in c)this.days=this.days.concat(this.expand_by_day(a));else if(2==o&&"BYDAY"in c&&"BYMONTH"in c){for(var q in this.by_data.BYMONTH)if(this.by_data.BYMONTH.hasOwnProperty(q)){var j=this.by_data.BYMONTH[q],v=ICAL.Time.daysInMonth(j,a);b.year=a,b.month=this.by_data.BYMONTH[q],b.firstDay=1,b.isDate=!0;var x=b.dayOfWeek(),y=b.dayOfYear()-1;b.firstDay=v;var z=b.dayOfWeek();if(this.has_by_data("BYSETPOS")){for(var A=[],B=1;B<=v;B++)b.firstDay=B,this.is_day_in_byday(b)&&A.push(B);for(var C=0;C<A.length;C++)(this.check_set_position(C+1)||this.check_set_position(C-A.length))&&this.days.push(y+A[C])}else for(var D in this.by_data.BYDAY)if(this.by_data.BYDAY.hasOwnProperty(D)){var E,F=this.by_data.BYDAY[D],G=this.ruleDayOfWeek(F),H=G[0],I=G[1],J=(I+7-x)%7+1,K=v-(z+7-I)%7;if(0==H)for(var B=J;B<=v;B+=7)this.days.push(y+B);else H>0?(E=J+7*(H-1),E<=v&&this.days.push(y+E)):(E=K+7*(H+1),E>0&&this.days.push(y+E))}}this.days.sort(function(a,b){return a-b})}else if(2==o&&"BYDAY"in c&&"BYMONTHDAY"in c){var L=this.expand_by_day(a);for(var M in L)if(L.hasOwnProperty(M)){var B=L[M],N=ICAL.Time.fromDayOfYear(B,a);this.by_data.BYMONTHDAY.indexOf(N.day)>=0&&this.days.push(B)}}else if(3==o&&"BYDAY"in c&&"BYMONTHDAY"in c&&"BYMONTH"in c){var L=this.expand_by_day(a);for(var M in L)if(L.hasOwnProperty(M)){var B=L[M],N=ICAL.Time.fromDayOfYear(B,a);this.by_data.BYMONTH.indexOf(N.month)>=0&&this.by_data.BYMONTHDAY.indexOf(N.day)>=0&&this.days.push(B)}}else if(2==o&&"BYDAY"in c&&"BYWEEKNO"in c){var L=this.expand_by_day(a);for(var M in L)if(L.hasOwnProperty(M)){var B=L[M],N=ICAL.Time.fromDayOfYear(B,a),n=N.weekNumber(this.rule.wkst);this.by_data.BYWEEKNO.indexOf(n)&&this.days.push(B)}}else 3==o&&"BYDAY"in c&&"BYWEEKNO"in c&&"BYMONTHDAY"in c||(1==o&&"BYYEARDAY"in c?this.days=this.days.concat(this.by_data.BYYEARDAY):this.days=[]);return 0},expand_by_day:function(a){var b=[],c=this.last.clone();c.year=a,c.month=1,c.day=1,c.isDate=!0;var d=c.dayOfWeek();c.month=12,c.day=31,c.isDate=!0;var e=c.dayOfWeek(),f=c.dayOfYear();for(var g in this.by_data.BYDAY)if(this.by_data.BYDAY.hasOwnProperty(g)){var h=this.by_data.BYDAY[g],i=this.ruleDayOfWeek(h),j=i[0],k=i[1];if(0==j)for(var l=(k+7-d)%7+1,m=l;m<=f;m+=7)b.push(m);else if(j>0){var n;n=k>=d?k-d+1:k-d+8,b.push(n+7*(j-1))}else{var o;j=-j,o=k<=e?f-e+k:f-e+k-7,b.push(o-7*(j-1))}}return b},is_day_in_byday:function(a){for(var b in this.by_data.BYDAY)if(this.by_data.BYDAY.hasOwnProperty(b)){var c=this.by_data.BYDAY[b],d=this.ruleDayOfWeek(c),e=d[0],f=d[1],g=a.dayOfWeek();if(0==e&&f==g||a.nthWeekDay(f,e)==a.day)return 1}return 0},check_set_position:function(a){if(this.has_by_data("BYSETPOS")){var b=this.by_data.BYSETPOS.indexOf(a);return b!==-1}return!1},sort_byday_rules:function(a,b){for(var c=0;c<a.length;c++)for(var d=0;d<c;d++){var e=this.ruleDayOfWeek(a[d])[1],f=this.ruleDayOfWeek(a[c])[1];if(e-=b,f-=b,e<0&&(e+=7),f<0&&(f+=7),e>f){var g=a[c];a[c]=a[d],a[d]=g}}},check_contract_restriction:function(b,c){var d=a._indexMap[b],e=a._expandMap[this.rule.freq][d],f=!1;if(b in this.by_data&&e==a.CONTRACT){var g=this.by_data[b];for(var h in g)if(g.hasOwnProperty(h)&&g[h]==c){f=!0;break}}else f=!0;return f},check_contracting_rules:function(){var a=this.last.dayOfWeek(),b=this.last.weekNumber(this.rule.wkst),c=this.last.dayOfYear();return this.check_contract_restriction("BYSECOND",this.last.second)&&this.check_contract_restriction("BYMINUTE",this.last.minute)&&this.check_contract_restriction("BYHOUR",this.last.hour)&&this.check_contract_restriction("BYDAY",ICAL.Recur.numericDayToIcalDay(a))&&this.check_contract_restriction("BYWEEKNO",b)&&this.check_contract_restriction("BYMONTHDAY",this.last.day)&&this.check_contract_restriction("BYMONTH",this.last.month)&&this.check_contract_restriction("BYYEARDAY",c)},setup_defaults:function(b,c,d){var e=a._indexMap[b],f=a._expandMap[this.rule.freq][e];return f!=a.CONTRACT&&(b in this.by_data||(this.by_data[b]=[d]),this.rule.freq!=c)?this.by_data[b][0]:d},toJSON:function(){var a=Object.create(null);return a.initialized=this.initialized,a.rule=this.rule.toJSON(),a.dtstart=this.dtstart.toJSON(),a.by_data=this.by_data,a.days=this.days,a.last=this.last.toJSON(),a.by_indices=this.by_indices,a.occurrence_number=this.occurrence_number,a}},a._indexMap={BYSECOND:0,BYMINUTE:1,BYHOUR:2,BYDAY:3,BYMONTHDAY:4,BYYEARDAY:5,BYWEEKNO:6,BYMONTH:7,BYSETPOS:8},a._expandMap={SECONDLY:[1,1,1,1,1,1,1,1],MINUTELY:[2,1,1,1,1,1,1,1],HOURLY:[2,2,1,1,1,1,1,1],DAILY:[2,2,2,1,1,1,1,1],WEEKLY:[2,2,2,2,3,3,1,1],MONTHLY:[2,2,2,2,2,3,3,1],YEARLY:[2,2,2,2,2,2,2,2]},a.UNKNOWN=0,a.CONTRACT=1,a.EXPAND=2,a.ILLEGAL=3,a}(),ICAL.RecurExpansion=function(){function a(a){return ICAL.helpers.formatClassType(a,ICAL.Time)}function b(a,b){return a.compare(b)}function c(a){return a.hasProperty("rdate")||a.hasProperty("rrule")||a.hasProperty("recurrence-id")}function d(a){this.ruleDates=[],this.exDates=[],this.fromData(a)}return d.prototype={complete:!1,ruleIterators:null,ruleDates:null,exDates:null,ruleDateInc:0,exDateInc:0,exDate:null,ruleDate:null,dtstart:null,last:null,fromData:function(b){var c=ICAL.helpers.formatClassType(b.dtstart,ICAL.Time);if(!c)throw new Error(".dtstart (ICAL.Time) must be given");if(this.dtstart=c,b.component)this._init(b.component);else{if(this.last=a(b.last)||c.clone(),!b.ruleIterators)throw new Error(".ruleIterators or .component must be given");this.ruleIterators=b.ruleIterators.map(function(a){return ICAL.helpers.formatClassType(a,ICAL.RecurIterator)}),this.ruleDateInc=b.ruleDateInc,this.exDateInc=b.exDateInc,b.ruleDates&&(this.ruleDates=b.ruleDates.map(a),this.ruleDate=this.ruleDates[this.ruleDateInc]),b.exDates&&(this.exDates=b.exDates.map(a),this.exDate=this.exDates[this.exDateInc]),"undefined"!=typeof b.complete&&(this.complete=b.complete)}},next:function(){for(var a,b,c,d=500,e=0;;){if(e++>d)throw new Error("max tries have occured, rule may be impossible to forfill.");if(b=this.ruleDate,a=this._nextRecurrenceIter(this.last),!b&&!a){this.complete=!0;break}if((!b||a&&b.compare(a.last)>0)&&(b=a.last.clone(),a.next()),this.ruleDate===b&&this._nextRuleDay(),this.last=b,!this.exDate||(c=this.exDate.compare(this.last),c<0&&this._nextExDay(),0!==c))return this.last;this._nextExDay()}},toJSON:function(){function a(a){return a.toJSON()}var b=Object.create(null);return b.ruleIterators=this.ruleIterators.map(a),this.ruleDates&&(b.ruleDates=this.ruleDates.map(a)),this.exDates&&(b.exDates=this.exDates.map(a)),b.ruleDateInc=this.ruleDateInc,b.exDateInc=this.exDateInc,b.last=this.last.toJSON(),b.dtstart=this.dtstart.toJSON(),b.complete=this.complete,b},_extractDates:function(a,c){function d(a){e=ICAL.helpers.binsearchInsert(f,a,b),f.splice(e,0,a)}for(var e,f=[],g=a.getAllProperties(c),h=g.length,i=0;i<h;i++)g[i].getValues().forEach(d);return f},_init:function(a){if(this.ruleIterators=[],this.last=this.dtstart.clone(),!c(a))return this.ruleDate=this.last.clone(),void(this.complete=!0);if(a.hasProperty("rdate")&&(this.ruleDates=this._extractDates(a,"rdate"),this.ruleDates[0]&&this.ruleDates[0].compare(this.dtstart)<0?(this.ruleDateInc=0,this.last=this.ruleDates[0].clone()):this.ruleDateInc=ICAL.helpers.binsearchInsert(this.ruleDates,this.last,b),this.ruleDate=this.ruleDates[this.ruleDateInc]),a.hasProperty("rrule"))for(var d,e,f=a.getAllProperties("rrule"),g=0,h=f.length;g<h;g++)d=f[g].getFirstValue(),e=d.iterator(this.dtstart),this.ruleIterators.push(e),e.next();a.hasProperty("exdate")&&(this.exDates=this._extractDates(a,"exdate"),this.exDateInc=ICAL.helpers.binsearchInsert(this.exDates,this.last,b),this.exDate=this.exDates[this.exDateInc])},_nextExDay:function(){this.exDate=this.exDates[++this.exDateInc]},_nextRuleDay:function(){this.ruleDate=this.ruleDates[++this.ruleDateInc]},_nextRecurrenceIter:function(){var a=this.ruleIterators;if(0===a.length)return null;for(var b,c,d,e=a.length,f=0;f<e;f++)b=a[f],c=b.last,b.completed?(e--,0!==f&&f--,a.splice(f,1)):(!d||d.last.compare(c)>0)&&(d=b);return d}},d}(),ICAL.Event=function(){function a(a,b){a instanceof ICAL.Component||(b=a,a=null),a?this.component=a:this.component=new ICAL.Component("vevent"),this._rangeExceptionCache=Object.create(null),this.exceptions=Object.create(null),this.rangeExceptions=[],b&&b.strictExceptions&&(this.strictExceptions=b.strictExceptions),b&&b.exceptions&&b.exceptions.forEach(this.relateException,this)}function b(a,b){return a[0]>b[0]?1:b[0]>a[0]?-1:0}return a.prototype={THISANDFUTURE:"THISANDFUTURE",exceptions:null,strictExceptions:!1,relateException:function(a){if(this.isRecurrenceException())throw new Error("cannot relate exception to exceptions");if(a instanceof ICAL.Component&&(a=new ICAL.Event(a)),this.strictExceptions&&a.uid!==this.uid)throw new Error("attempted to relate unrelated exception");var c=a.recurrenceId.toString();if(this.exceptions[c]=a,a.modifiesFuture()){var d=[a.recurrenceId.toUnixTime(),c],e=ICAL.helpers.binsearchInsert(this.rangeExceptions,d,b);this.rangeExceptions.splice(e,0,d)}},modifiesFuture:function(){var a=this.component.getFirstPropertyValue("range");return a===this.THISANDFUTURE},findRangeException:function(a){if(!this.rangeExceptions.length)return null;var c=a.toUnixTime(),d=ICAL.helpers.binsearchInsert(this.rangeExceptions,[c],b);if(d-=1,d<0)return null;var e=this.rangeExceptions[d];return c<e[0]?null:e[1]},getOccurrenceDetails:function(a){var b,c=a.toString(),d=a.convertToZone(ICAL.Timezone.utcTimezone).toString(),e={recurrenceId:a};if(c in this.exceptions)b=e.item=this.exceptions[c],e.startDate=b.startDate,e.endDate=b.endDate,e.item=b;else if(d in this.exceptions)b=this.exceptions[d],e.startDate=b.startDate,e.endDate=b.endDate,e.item=b;else{var f,g=this.findRangeException(a);if(g){var h=this.exceptions[g];e.item=h;var i=this._rangeExceptionCache[g];if(!i){var j=h.recurrenceId.clone(),k=h.startDate.clone();j.zone=k.zone,i=k.subtractDate(j),this._rangeExceptionCache[g]=i}var l=a.clone();l.zone=h.startDate.zone,l.addDuration(i),f=l.clone(),f.addDuration(h.duration),e.startDate=l,e.endDate=f}else f=a.clone(),f.addDuration(this.duration),e.endDate=f,e.startDate=a,e.item=this}return e},iterator:function(a){return new ICAL.RecurExpansion({component:this.component,dtstart:a||this.startDate})},isRecurring:function(){var a=this.component;return a.hasProperty("rrule")||a.hasProperty("rdate")},isRecurrenceException:function(){return this.component.hasProperty("recurrence-id")},getRecurrenceTypes:function(){for(var a=this.component.getAllProperties("rrule"),b=0,c=a.length,d=Object.create(null);b<c;b++){var e=a[b].getFirstValue();d[e.freq]=!0}return d},get uid(){return this._firstProp("uid")},set uid(a){this._setProp("uid",a)},get startDate(){return this._firstProp("dtstart")},set startDate(a){this._setTime("dtstart",a)},get endDate(){var a=this._firstProp("dtend");if(!a){var b=this._firstProp("duration");a=this.startDate.clone(),b?a.addDuration(b):a.isDate&&(a.day+=1)}return a},set endDate(a){this._setTime("dtend",a)},get duration(){var a=this._firstProp("duration");return a?a:this.endDate.subtractDate(this.startDate)},get location(){return this._firstProp("location")},set location(a){return this._setProp("location",a)},get attendees(){return this.component.getAllProperties("attendee")},get summary(){return this._firstProp("summary")},set summary(a){this._setProp("summary",a)},get description(){return this._firstProp("description")},set description(a){this._setProp("description",a)},get organizer(){return this._firstProp("organizer")},set organizer(a){this._setProp("organizer",a)},get sequence(){return this._firstProp("sequence")},set sequence(a){this._setProp("sequence",a)},get recurrenceId(){return this._firstProp("recurrence-id")},set recurrenceId(a){this._setProp("recurrence-id",a)},_setTime:function(a,b){var c=this.component.getFirstProperty(a);c||(c=new ICAL.Property(a),this.component.addProperty(c)),b.zone===ICAL.Timezone.localTimezone||b.zone===ICAL.Timezone.utcTimezone?c.removeParameter("tzid"):c.setParameter("tzid",b.zone.tzid),c.setValue(b)},_setProp:function(a,b){this.component.updatePropertyWithValue(a,b)},_firstProp:function(a){return this.component.getFirstPropertyValue(a)},toString:function(){return this.component.toString()}},a}(),ICAL.ComponentParser=function(){function a(a){"undefined"==typeof a&&(a={});var b;for(b in a)a.hasOwnProperty(b)&&(this[b]=a[b])}return a.prototype={parseEvent:!0,parseTimezone:!0,oncomplete:function(){},onerror:function(a){},ontimezone:function(a){},onevent:function(a){},process:function(a){"string"==typeof a&&(a=ICAL.parse(a)),a instanceof ICAL.Component||(a=new ICAL.Component(a));for(var b,c=a.getAllSubcomponents(),d=0,e=c.length;d<e;d++)switch(b=c[d],b.name){case"vtimezone":if(this.parseTimezone){var f=b.getFirstPropertyValue("tzid");f&&this.ontimezone(new ICAL.Timezone({tzid:f,component:b}))}break;case"vevent":this.parseEvent&&this.onevent(new ICAL.Event(b));break;default:continue}this.oncomplete()}},a}();
 //# sourceMappingURL=ical.min.js.map
 
-CURRENT_YEAR = Number(new Date().getFullYear());
-
-function hourMinuteToTime(time) {
-	time = time.replace(":", "");
+/**
+ * Transforms a time string such as: "9:00" into a full time string,
+ * ie.: 09:00:00, with 9 AM being the example.
+ *
+ * @param time the time to be transformed (eg. 5:00 for 5 AM).
+ * @returns {string} a formatted time with seconds and a leading zero if needed (eg. 05:00:00 for 5 AM).
+ */
+function formatTableTime(time) {
+	if (time.length < 5) time = "0" + time;
 	
-	if (time.length < 4) time = "0" + time;
-	
-	return time + "00";
+	return time + ":00";
 }
 
 /**
  * Gives an ICAL Time object given a row and a cell index.
  *
  * @param rowIndex the index of the row the course is in.
- * @param cellIndex the index of the row the course is in.
- * @returns {Time} the ICAL Time object
+ * @param cellIndex the index of the cell the course is in.
+ * @returns {Time} an ICAL Time object corresponding to the row and cell index.
  */
 function getTime(rowIndex, cellIndex) {
-	var startMonth = daysDate[rowIndex - 1].substring(4, 6);
-	var startDay = daysDate[rowIndex - 1].substring(6, 8);
-	var startHour = formattedTimes[cellIndex].substring(0, 2);
-	var startMinute = formattedTimes[cellIndex].substring(2, 4);
+	var startDate = datesOfWeek[rowIndex - 1];
+	var startTime = formattedTimes[cellIndex];
 
-	return new ICAL.Time({
-		year: CURRENT_YEAR,
-		month: Number(startMonth),
-		day: Number(startDay),
-		hour: Number(startHour),
-		minute: Number(startMinute),
-		second: 0,
-		isDate: false
-	});
+	var icalTime = new ICAL.Time();
+	icalTime.fromJSDate(new Date(startDate + "T" + startTime), true);
+
+	return icalTime;
+}
+
+/**
+ * Generates a (faked) unique identifier for <i>VEVENT</i> components.
+ *
+ * @returns {string} a unique identifier.
+ */
+function generateUID() {
+	function s4() {
+		return Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+	}
+	return ICAL.Time.now() + s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
+		+ "@dkit.ie";
 }
 
 // Creating the calendar:
@@ -42,28 +53,33 @@ var calendar = new ICAL.Component(['vcalendar', [], []]);
 calendar.updatePropertyWithValue('prodid', 'DkIT timetables browser extension');
 calendar.addPropertyWithValue("version", "2.0");
 
-// Generating hours and minutes of the day in ISO-8601 format:
+/* Generating hours and minutes of the day in
+ISO-8601 format, reading from the first table row: */
 var times = document.getElementsByClassName("col-label-one");
 
 formattedTimes = [];
 
-for (var node of times)	formattedTimes.push(hourMinuteToTime(node.innerHTML));
+for (var node of times)	formattedTimes.push(formatTableTime(node.innerHTML));
 
 // Generating dates of the selected week in ISO-8601 format:
 var selectedWeek = document.getElementsByClassName("header-3-0-17")[0].innerHTML;
 var days = selectedWeek.split("-");
 
-daysDate = [];
+datesOfWeek = [];
 
 var firstDay = new Date(days[0]);
 var lastDay = new Date(days[1]);
 
+/* Using the first and the last day of the week, that are given on
+* the generated timetable, we can create date strings for the
+* whole week: */
 while (firstDay.getDate() !== lastDay.getDate()) {
 	var month = firstDay.getMonth() + 1;
 
+	// Add a leading zero to the month if needed:
 	if (month < 10) month = String("0" + month);
 
-	daysDate.push(firstDay.getFullYear() + String(month) + firstDay.getDate());
+	datesOfWeek.push(firstDay.getFullYear() + "-" + String(month) + "-" + firstDay.getDate());
 	
 	firstDay.setDate(firstDay.getDate() + 1);
 }
@@ -71,17 +87,16 @@ while (firstDay.getDate() !== lastDay.getDate()) {
 // Adding the last day of the week:
 month = lastDay.getMonth() + 1;
 if (month < 10) month = String("0" + month);
-daysDate.push(lastDay.getFullYear() + String(month) + lastDay.getDate());
+datesOfWeek.push(lastDay.getFullYear() + "-" + String(month) + "-" + lastDay.getDate());
 
-// Reading classes:
+
+// Everything is set up, we can read classes from the table:
 
 /* All table cells that contain class information
-* have the same class, put them in a variable: */
+* have the same CSS class, put them in a variable: */
 var classes = document.getElementsByClassName("object-cell-border");
 
 var vevent, event;
-
-var uidHash = 0;
 // Read class attributes of each class:
 for (var course of classes) {
 	vevent = new ICAL.Component('vevent');
@@ -96,7 +111,7 @@ for (var course of classes) {
 
 	var cellIndex = 0;
 
-	// Counting how many cells were grouped to know when does the class start:
+	// Counting how many cells were merged (colSpan) to know when does the class start:
 	for (var cell of parentRow.children) {
 		if (cell.className === "row-label-one") continue;
 		if (cell === course) break;
@@ -119,23 +134,23 @@ for (var course of classes) {
 		for (var attr of tableData) otherAttributes.push(attr.innerHTML);
 	}
 
-	// Set the event location:
-	event.location = otherAttributes[0];
-
-	// ... use the attributes array to create a description:
 	event.description = "";
+
+	// ... use the attributes array to create the event description:
 	for (i = 1; i < otherAttributes.length; i++) {
-		event.description += otherAttributes[i] + "\r\n";
+		event.description += otherAttributes[i];
+
+		if (i !== otherAttributes.length - 1) event.description += "\n";
 	}
 
+	// Set the event location (which room):
+	event.location = otherAttributes[0];
 
 	// Set the mandatory fields for the event (according to iCalendar specification):
 	vevent.addPropertyWithValue("dtstamp", ICAL.Time.now());
-	vevent.addPropertyWithValue("uid", "DkIT Calendar " + uidHash);
+	vevent.addPropertyWithValue("uid", generateUID());
 
 	calendar.addSubcomponent(vevent);
-
-	uidHash++;
 }
 
 //console.log(calendar.toString());
