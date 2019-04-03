@@ -62,13 +62,20 @@ formattedTimes = [];
 for (var node of times)	formattedTimes.push(formatTableTime(node.innerHTML));
 
 // Generating dates of the selected week in ISO-8601 format:
-var selectedWeek = document.getElementsByClassName("header-3-0-17")[0].innerHTML;
+var selectedWeek = document.evaluate("/html/body/table[4]/tbody/tr/td/table/tbody/tr/td[3]/font/b",
+	document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.innerHTML;
+selectedWeek = selectedWeek.substring(selectedWeek.indexOf("(") + 1, selectedWeek.length - 1);
+
 var days = selectedWeek.split("-");
+
+var firstDayString = days[0];
+var lastDayString = days[1];
 
 datesOfWeek = [];
 
-var firstDay = new Date(days[0]);
-var lastDay = new Date(days[1]);
+// Create the dates for the first and last day of the week, truncating the useless parts of the string:
+var firstDay = new Date(firstDayString);
+var lastDay = new Date(lastDayString);
 
 /* Using the first and the last day of the week, that are given on
 * the generated timetable, we can create date strings for the
@@ -94,7 +101,8 @@ datesOfWeek.push(lastDay.getFullYear() + "-" + String(month) + "-" + lastDay.get
 
 /* All table cells that contain class information
 * have the same CSS class, put them in a variable: */
-var classes = document.getElementsByClassName("object-cell-border");
+//var classes = document.getElementsByClassName("object-cell-border");
+var classes = document.querySelectorAll("html body table tbody tr td[colspan][rowspan]");
 
 var vevent, event;
 // Read class attributes of each class:
@@ -102,18 +110,20 @@ for (var course of classes) {
 	vevent = new ICAL.Component('vevent');
 	event = new ICAL.Event(vevent);
 
-	var attributes = course.getElementsByClassName("object-cell-args");
+	//var attributes = course.getElementsByClassName("object-cell-args");
+	var attributes = course.getElementsByTagName("TD");
 
-	event.summary = attributes[0].getElementsByTagName("TD")[0].innerHTML;
+	event.summary = attributes[0].innerText;
 
 	// Getting the <tr> we're in:
 	var parentRow = course.parentElement;
 
 	var cellIndex = 0;
 
+	// TODO: fix start/end time
 	// Counting how many cells were merged (colSpan) to know when does the class start:
 	for (var cell of parentRow.children) {
-		if (cell.className === "row-label-one") continue;
+		if (cell.cellIndex === 0) continue;
 		if (cell === course) break;
 
 		if (cell.hasAttribute("colSpan")) cellIndex += cell.colSpan;
@@ -129,9 +139,7 @@ for (var course of classes) {
 	var otherAttributes = [];
 
 	for (var i = 1; i < attributes.length; i++) {
-		var tableData = attributes[i].getElementsByTagName("TD");
-
-		for (var attr of tableData) otherAttributes.push(attr.innerHTML);
+		otherAttributes.push(attributes[i].innerText);
 	}
 
 	event.description = "";
