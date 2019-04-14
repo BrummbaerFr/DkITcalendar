@@ -55,11 +55,15 @@ calendar.addPropertyWithValue("version", "2.0");
 
 /* Generating hours and minutes of the day in
 ISO-8601 format, reading from the first table row: */
-var times = document.getElementsByClassName("col-label-one");
+//var times = document.getElementsByClassName("col-label-one");
+var times = document.querySelectorAll("body > table:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td");
+
 
 formattedTimes = [];
 
-for (var node of times)	formattedTimes.push(formatTableTime(node.innerHTML));
+for (i = 1; i < times.length; i++) {
+	formattedTimes.push(formatTableTime(times[i].innerText));
+}
 
 // Generating dates of the selected week in ISO-8601 format:
 var selectedWeek = document.evaluate("/html/body/table[4]/tbody/tr/td/table/tbody/tr/td[3]/font/b",
