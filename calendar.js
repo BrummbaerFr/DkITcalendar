@@ -18,7 +18,7 @@ browser.browserAction.onClicked.addListener((tab) => {
 	// Launch the script only when we're on a timetable page:
 	if (tab.url.includes("timetables.dkit.ie")) {
 		browser.tabs.executeScript({
-			file: "generate.js"
+			file: "/generate.js"
 		});
 
 		// Listen for the generator's response:
