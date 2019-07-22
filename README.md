@@ -8,6 +8,9 @@ DkITcalendar is a Firefox extension that converts a DkIT timetable (from https:/
 ## How to use
 
 Simply click the DkITcalendar button next to your address bar, when on a DkIT timetable page.
+
+![Icon location](https://raw.githubusercontent.com/BrummbaerFr/DkITcalendar/master/Screenshot.png)
+
 You can then save the ICS file and export it to your favourite calendar app.
 
 ## Download (Firefox)
