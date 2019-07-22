@@ -12,3 +12,4 @@ You can then save the ICS file and export it to your favourite calendar app.
 
 ## Download (Firefox)
 
+https://github.com/BrummbaerFr/DkITcalendar/releases/download/v1.1/dkitcalendar-1.1-fx.xpi
